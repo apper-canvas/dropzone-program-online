@@ -105,8 +105,66 @@ return { ...reUploadedFile };
     
     const { shared, sharedAt, expiresAt, ...fileWithoutShare } = this.files[index];
     this.files[index] = fileWithoutShare;
+return { ...this.files[index] };
+  }
+
+  async searchFiles(searchTerm) {
+    await delay(200);
+    if (!searchTerm.trim()) return [...this.files];
     
-    return { ...this.files[index] };
+    return this.files.filter(file =>
+      file.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ).map(f => ({ ...f }));
+  }
+
+  async filterByType(fileType) {
+    await delay(200);
+    if (fileType === 'all') return [...this.files];
+    
+    return this.files.filter(file => {
+      switch (fileType) {
+        case 'images':
+          return file.type.startsWith('image/');
+        case 'documents':
+          return file.type.includes('document') || file.type.includes('word');
+        case 'spreadsheets':
+          return file.type.includes('spreadsheet') || file.type.includes('excel');
+        case 'pdfs':
+          return file.type === 'application/pdf';
+        default:
+          return true;
+      }
+    }).map(f => ({ ...f }));
+  }
+
+  async searchAndFilter(searchTerm, fileType) {
+    await delay(200);
+    let filteredFiles = [...this.files];
+    
+    if (searchTerm.trim()) {
+      filteredFiles = filteredFiles.filter(file =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (fileType !== 'all') {
+      filteredFiles = filteredFiles.filter(file => {
+        switch (fileType) {
+          case 'images':
+            return file.type.startsWith('image/');
+          case 'documents':
+            return file.type.includes('document') || file.type.includes('word');
+          case 'spreadsheets':
+            return file.type.includes('spreadsheet') || file.type.includes('excel');
+          case 'pdfs':
+            return file.type === 'application/pdf';
+          default:
+            return true;
+        }
+      });
+    }
+    
+    return filteredFiles.map(f => ({ ...f }));
   }
 }
 

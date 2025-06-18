@@ -10,6 +10,9 @@ const FileSidebar = ({ isOpen, onClose }) => {
   const [files, setFiles] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState('all')
+  const [allFiles, setAllFiles] = useState([])
 
   useEffect(() => {
     if (isOpen) {
@@ -17,12 +20,14 @@ const FileSidebar = ({ isOpen, onClose }) => {
     }
   }, [isOpen])
 
-  const loadFiles = async () => {
+const loadFiles = async () => {
     try {
       setLoading(true)
       setError(null)
       const fileData = await fileService.getAll()
-      setFiles(fileData.filter(f => f.status === 'completed'))
+      const completedFiles = fileData.filter(f => f.status === 'completed')
+      setAllFiles(completedFiles)
+      filterFiles(completedFiles, searchTerm, filterType)
     } catch (err) {
       setError('Failed to load files')
       toast.error('Failed to load files')
@@ -31,14 +36,68 @@ const FileSidebar = ({ isOpen, onClose }) => {
     }
   }
 
-  const handleDelete = async (fileId, fileName) => {
+  const filterFiles = (fileList, search, type) => {
+    let filtered = [...fileList]
+    
+    if (search.trim()) {
+      filtered = filtered.filter(file =>
+        file.name.toLowerCase().includes(search.toLowerCase())
+      )
+    }
+    
+    if (type !== 'all') {
+      filtered = filtered.filter(file => {
+        switch (type) {
+          case 'images':
+            return file.type.startsWith('image/')
+          case 'documents':
+            return file.type.includes('document') || file.type.includes('word')
+          case 'spreadsheets':
+            return file.type.includes('spreadsheet') || file.type.includes('excel')
+          case 'pdfs':
+            return file.type === 'application/pdf'
+          default:
+            return true
+        }
+      })
+    }
+    
+    setFiles(filtered)
+  }
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearchTerm(value)
+    filterFiles(allFiles, value, filterType)
+  }
+
+  const handleFilterChange = (e) => {
+    const value = e.target.value
+    setFilterType(value)
+    filterFiles(allFiles, searchTerm, value)
+  }
+
+  const clearSearch = () => {
+    setSearchTerm('')
+    filterFiles(allFiles, '', filterType)
+  }
+
+  const resetFilters = () => {
+    setSearchTerm('')
+    setFilterType('all')
+    filterFiles(allFiles, '', 'all')
+  }
+
+const handleDelete = async (fileId, fileName) => {
     if (!confirm(`Are you sure you want to delete "${fileName}"?`)) {
       return
     }
 
     try {
       await fileService.delete(fileId)
-      setFiles(prev => prev.filter(f => f.Id !== fileId))
+      const updatedAllFiles = allFiles.filter(f => f.Id !== fileId)
+      setAllFiles(updatedAllFiles)
+      filterFiles(updatedAllFiles, searchTerm, filterType)
       toast.success(`Deleted ${fileName}`)
     } catch (err) {
       toast.error(`Failed to delete ${fileName}`)
@@ -109,6 +168,57 @@ const FileSidebar = ({ isOpen, onClose }) => {
           >
             <ApperIcon name="X" size={16} />
           </button>
+</div>
+
+        {/* Search and Filter */}
+        <div className="p-4 border-b border-surface-700 space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <ApperIcon 
+              name="Search" 
+              size={16} 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+            />
+            <input
+              type="text"
+              placeholder="Search files..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-10 py-2 bg-surface-700 border border-surface-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+            />
+            {searchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              >
+                <ApperIcon name="X" size={16} />
+              </button>
+            )}
+          </div>
+
+          {/* Filter Dropdown */}
+          <div className="flex items-center space-x-2">
+            <ApperIcon name="Filter" size={16} className="text-gray-400" />
+            <select
+              value={filterType}
+              onChange={handleFilterChange}
+              className="flex-1 py-2 px-3 bg-surface-700 border border-surface-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
+            >
+              <option value="all">All Files</option>
+              <option value="images">Images</option>
+              <option value="documents">Documents</option>
+              <option value="spreadsheets">Spreadsheets</option>
+              <option value="pdfs">PDFs</option>
+            </select>
+            {(searchTerm || filterType !== 'all') && (
+              <button
+                onClick={resetFilters}
+                className="px-3 py-2 text-xs text-gray-400 hover:text-white transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Content */}
@@ -129,18 +239,38 @@ const FileSidebar = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {!loading && !error && files.length === 0 && (
+{!loading && !error && files.length === 0 && allFiles.length === 0 && (
             <div className="text-center py-8">
               <ApperIcon name="FileX" size={48} className="text-gray-400 mx-auto mb-4" />
               <p className="text-gray-400">No files uploaded yet</p>
             </div>
           )}
 
+          {!loading && !error && files.length === 0 && allFiles.length > 0 && (
+            <div className="text-center py-8">
+              <ApperIcon name="Search" size={48} className="text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-400 mb-2">No files match your search</p>
+              <Button variant="ghost" onClick={resetFilters} size="small">
+                Clear Filters
+              </Button>
+            </div>
+          )}
+
           {!loading && !error && files.length > 0 && (
             <div className="space-y-3">
-              <p className="text-sm text-gray-400 mb-4">
-                {files.length} file{files.length !== 1 ? 's' : ''} uploaded
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-400">
+                  {files.length} of {allFiles.length} file{allFiles.length !== 1 ? 's' : ''}
+                </p>
+                {(searchTerm || filterType !== 'all') && (
+                  <button
+                    onClick={resetFilters}
+                    className="text-xs text-primary hover:text-primary-light transition-colors"
+                  >
+                    Show All
+                  </button>
+                )}
+              </div>
               
               {files.map((file) => (
                 <motion.div
