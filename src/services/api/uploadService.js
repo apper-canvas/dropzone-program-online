@@ -1,6 +1,99 @@
+import imageCompression from 'browser-image-compression';
+
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// File constructor polyfill for cross-environment compatibility
+const FileConstructor = typeof File !== 'undefined' 
+  ? File 
+  : class File {
+      constructor(chunks, filename, options = {}) {
+        this.name = filename;
+        this.type = options.type || '';
+        this.lastModified = options.lastModified || Date.now();
+        this.size = chunks.reduce((total, chunk) => {
+          if (chunk instanceof ArrayBuffer) return total + chunk.byteLength;
+          if (typeof chunk === 'string') return total + chunk.length;
+          return total + (chunk.size || 0);
+        }, 0);
+        this._chunks = chunks;
+      }
+    };
+
 class UploadService {
+  async compressFile(file, quality = 0.8) {
+    // Handle image compression
+    if (file.type.startsWith('image/')) {
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+          initialQuality: quality
+        };
+const compressedFile = await imageCompression(file, options);
+      return new FileConstructor([compressedFile], file.name, {
+        type: file.type,
+        lastModified: file.lastModified
+      });
+    } catch (error) {
+      throw new Error(`Image compression failed: ${error.message}`);
+    }
+  }
+    // Handle PDF and document compression (simulated)
+    if (file.type === 'application/pdf' || 
+        file.type.includes('document') || 
+        file.type.includes('word') ||
+        file.type.includes('spreadsheet') ||
+        file.type.includes('excel')) {
+      
+      // Simulate document compression with quality-based size reduction
+      const compressionRatio = 1 - (quality * 0.3); // Up to 30% compression
+      const compressedSize = Math.floor(file.size * (1 - compressionRatio));
+      
+// Create a new file with simulated compressed size
+    const compressedArrayBuffer = new ArrayBuffer(compressedSize);
+    return new FileConstructor([compressedArrayBuffer], file.name, {
+      type: file.type,
+      lastModified: file.lastModified
+    });
+  }
+  
+  // For other file types, simulate basic compression
+    if (file.size > 100 * 1024) { // Only compress files larger than 100KB
+      const compressionRatio = 1 - (quality * 0.2); // Up to 20% compression
+      const compressedSize = Math.floor(file.size * (1 - compressionRatio));
+const compressedArrayBuffer = new ArrayBuffer(compressedSize);
+    return new FileConstructor([compressedArrayBuffer], file.name, {
+      type: file.type,
+      lastModified: file.lastModified
+    });
+  }
+  
+  // Return original file if no compression is applicable
+    return file;
+  }
+
+  getCompressionInfo(originalSize, compressedSize) {
+    const savings = originalSize - compressedSize;
+    const percentage = ((savings / originalSize) * 100).toFixed(1);
+    
+    return {
+      originalSize: this.formatFileSize(originalSize),
+      compressedSize: this.formatFileSize(compressedSize),
+      savings: this.formatFileSize(savings),
+      percentage: parseFloat(percentage)
+    };
+  }
+
+  isCompressible(file) {
+    return file.type.startsWith('image/') || 
+           file.type === 'application/pdf' ||
+           file.type.includes('document') ||
+           file.type.includes('word') ||
+           file.type.includes('spreadsheet') ||
+           file.type.includes('excel') ||
+           file.size > 100 * 1024; // Files larger than 100KB
+  }
   async simulateUpload(file, onProgress) {
     const totalChunks = 10;
     const chunkDelay = 200;

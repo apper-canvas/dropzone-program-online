@@ -1,11 +1,17 @@
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import { uploadService } from '@/services';
+import React, { useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
+import { uploadService } from "@/services";
 
-const DropZone = ({ onFilesAdded, acceptedTypes = [], maxFileSize = 10 * 1024 * 1024 }) => {
+const DropZone = ({ 
+  onFilesAdded, 
+  acceptedTypes = [], 
+  maxFileSize = 10 * 1024 * 1024,
+  compressionEnabled = false,
+  compressionLevel = 0.8
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -34,24 +40,39 @@ const DropZone = ({ onFilesAdded, acceptedTypes = [], maxFileSize = 10 * 1024 * 
     e.target.value = '';
   };
 
-  const processFiles = (files) => {
+const processFiles = async (files) => {
     const validFiles = [];
     
-    files.forEach(file => {
+    for (const file of files) {
       // Check file size
       if (file.size > maxFileSize) {
         toast.error(`${file.name} is too large. Maximum size is ${uploadService.formatFileSize(maxFileSize)}`);
-        return;
+        continue;
       }
       
       // Check file type
       if (acceptedTypes.length > 0 && !uploadService.isValidFileType(file, acceptedTypes)) {
         toast.error(`${file.name} is not a supported file type`);
-        return;
+        continue;
       }
       
-      validFiles.push(file);
-    });
+      let processedFile = file;
+      
+      // Apply compression if enabled
+      if (compressionEnabled) {
+        try {
+          toast.info(`Compressing ${file.name}...`);
+          processedFile = await uploadService.compressFile(file, compressionLevel);
+          const savings = ((file.size - processedFile.size) / file.size * 100).toFixed(1);
+          toast.success(`${file.name} compressed by ${savings}%`);
+        } catch (error) {
+          toast.warning(`Compression failed for ${file.name}, using original file`);
+          processedFile = file;
+        }
+      }
+      
+      validFiles.push(processedFile);
+    }
     
     if (validFiles.length > 0) {
       onFilesAdded(validFiles);
