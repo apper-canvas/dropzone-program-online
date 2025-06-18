@@ -1,0 +1,35 @@
+[
+  {
+    "Id": 1,
+    "name": "presentation.pdf",
+    "size": 2458624,
+    "type": "application/pdf",
+    "status": "completed",
+    "progress": 100,
+    "url": "https://example.com/files/presentation.pdf",
+    "thumbnailUrl": null,
+    "uploadedAt": "2024-01-15T10:30:00Z"
+  },
+  {
+    "Id": 2,
+    "name": "vacation-photo.jpg",
+    "size": 1024000,
+    "type": "image/jpeg",
+    "status": "completed",
+    "progress": 100,
+    "url": "https://example.com/files/vacation-photo.jpg",
+    "thumbnailUrl": "https://example.com/thumbnails/vacation-photo.jpg",
+    "uploadedAt": "2024-01-15T09:15:00Z"
+  },
+  {
+    "Id": 3,
+    "name": "budget-spreadsheet.xlsx",
+    "size": 512000,
+    "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "status": "completed",
+    "progress": 100,
+    "url": "https://example.com/files/budget-spreadsheet.xlsx",
+    "thumbnailUrl": null,
+    "uploadedAt": "2024-01-15T08:45:00Z"
+  }
+]
