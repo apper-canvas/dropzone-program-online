@@ -51,10 +51,27 @@ class FileService {
     return true;
   }
 
-  async deleteAll() {
+async deleteAll() {
     await delay(300);
     this.files = [];
     return true;
+  }
+
+  async reUpload(id) {
+    await delay(300);
+    const originalFile = this.files.find(f => f.Id === parseInt(id, 10));
+    if (!originalFile) throw new Error('File not found');
+    
+    const reUploadedFile = {
+      ...originalFile,
+      Id: this.nextId++,
+      uploadedAt: new Date().toISOString(),
+      status: 'pending',
+      progress: 0
+    };
+    
+    this.files.push(reUploadedFile);
+    return { ...reUploadedFile };
   }
 }
 
