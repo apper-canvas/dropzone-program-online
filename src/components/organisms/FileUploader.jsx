@@ -6,7 +6,7 @@ import FileItem from "@/components/molecules/FileItem";
 import FilePreviewModal from "@/components/molecules/FilePreviewModal";
 import UploadStats from "@/components/molecules/UploadStats";
 import Button from "@/components/atoms/Button";
-import ApperIcon from "@/components/atoms/ApperIcon";
+import ApperIcon from "@/components/ApperIcon";
 import { uploadService } from "@/services";
 
 const FileUploader = () => {
@@ -15,6 +15,7 @@ const FileUploader = () => {
   const [previewFile, setPreviewFile] = useState(null);
   const [compressionEnabled, setCompressionEnabled] = useState(false);
   const [compressionLevel, setCompressionLevel] = useState(0.8);
+  
   const acceptedTypes = [
     'image/*',
     'application/pdf',
@@ -115,7 +116,7 @@ const FileUploader = () => {
         className="bg-surface-800 rounded-xl p-6 border border-surface-700">
         <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-display font-semibold text-white">Compression Settings
-                          </h3>
+                                          </h3>
             <div className="flex items-center space-x-3">
                 <span className="text-sm text-gray-400">Enable Compression</span>
                 <button
@@ -149,10 +150,10 @@ const FileUploader = () => {
             <div className="space-y-2">
                 <div className="flex justify-between items-center">
                     <label className="text-sm font-medium text-gray-300">Compression Level
-                                        </label>
+                                                                </label>
                     <span className="text-sm text-gray-400">
                         {Math.round(compressionLevel * 100)}% Quality
-                                        </span>
+                                                                </span>
                 </div>
                 <input
                     type="range"
@@ -171,7 +172,7 @@ const FileUploader = () => {
                 <p className="flex items-center space-x-2">
                     <ApperIcon name="Info" size={16} className="text-blue-400" />
                     <span>Higher compression reduces file size but may affect quality. 
-                                          {compressionLevel >= 0.8 ? " Recommended for photos." : compressionLevel >= 0.5 ? " Balanced quality and size." : " Maximum compression."}
+                                                                  {compressionLevel >= 0.8 ? " Recommended for photos." : compressionLevel >= 0.5 ? " Balanced quality and size." : " Maximum compression."}
                     </span>
                 </p>
             </div>
@@ -203,13 +204,13 @@ const FileUploader = () => {
             onClick={handleUploadAll}
             disabled={uploading || pendingFiles.length === 0}
             loading={uploading}>Upload All ({pendingFiles.length})
-                      </Button>
+                                  </Button>
         <Button
             variant="ghost"
             icon="Trash2"
             onClick={handleClearAll}
             disabled={uploading}>Clear All
-                      </Button>
+                                  </Button>
     </motion.div>}
     {/* File List */}
     {hasFiles && <motion.div
@@ -221,7 +222,7 @@ const FileUploader = () => {
         }}
         className="space-y-3">
         <h2 className="text-xl font-display font-semibold text-white">Files ({files.length})
-                      </h2>
+                                  </h2>
         <AnimatePresence>
             {files.map((file, index) => <motion.div
                 key={file.id}
