@@ -11,8 +11,8 @@ const FileItem = ({ file, onUpdate, onRemove, onPreview }) => {
     toast.success(`Removed ${file.name}`);
   };
 
-  const handlePreview = () => {
-    if (file.type.startsWith('image/') && file.url) {
+const handlePreview = () => {
+    if (canPreview) {
       onPreview(file);
     }
   };
@@ -33,9 +33,14 @@ const FileItem = ({ file, onUpdate, onRemove, onPreview }) => {
       case 'failed': return 'XCircle';
       default: return 'Clock';
     }
-  };
+};
 
-  const canPreview = file.type.startsWith('image/') && (file.url || file.thumbnailUrl);
+  const canPreview = (file.url || file.thumbnailUrl) && (
+    file.type.startsWith('image/') || 
+    file.type === 'application/pdf' ||
+    file.type === 'application/msword' ||
+    file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  );
 
   return (
     <motion.div
