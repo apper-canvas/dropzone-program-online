@@ -71,7 +71,42 @@ async deleteAll() {
     };
     
     this.files.push(reUploadedFile);
-    return { ...reUploadedFile };
+return { ...reUploadedFile };
+  }
+
+  async getSharedFiles() {
+    await delay(300);
+    return this.files.filter(f => f.shared === true).map(f => ({ ...f }));
+  }
+
+  async shareFile(id, expiryDays = null) {
+    await delay(200);
+    const index = this.files.findIndex(f => f.Id === parseInt(id, 10));
+    if (index === -1) throw new Error('File not found');
+    
+    const expiryDate = expiryDays ? 
+      new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString() : 
+      null;
+    
+    this.files[index] = { 
+      ...this.files[index], 
+      shared: true,
+      sharedAt: new Date().toISOString(),
+      expiresAt: expiryDate
+    };
+    
+    return { ...this.files[index] };
+  }
+
+  async unshareFile(id) {
+    await delay(200);
+    const index = this.files.findIndex(f => f.Id === parseInt(id, 10));
+    if (index === -1) throw new Error('File not found');
+    
+    const { shared, sharedAt, expiresAt, ...fileWithoutShare } = this.files[index];
+    this.files[index] = fileWithoutShare;
+    
+    return { ...this.files[index] };
   }
 }
 

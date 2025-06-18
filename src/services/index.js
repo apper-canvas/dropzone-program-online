@@ -1,2 +1,9 @@
-export { default as fileService } from './api/fileService';
-export { default as uploadService } from './api/uploadService';
+import fileService from './api/fileService';
+import shareService from './api/shareService';
+import uploadService from './api/uploadService';
+
+export {
+  fileService,
+  shareService,
+  uploadService
+};

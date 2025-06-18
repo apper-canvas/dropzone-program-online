@@ -1,20 +1,27 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import ApperIcon from '@/components/ApperIcon';
 import Button from '@/components/atoms/Button';
 import CircularProgress from '@/components/atoms/CircularProgress';
+import ShareModal from '@/components/molecules/ShareModal';
 import { uploadService } from '@/services';
-
 const FileItem = ({ file, onUpdate, onRemove, onPreview }) => {
+  const [showShareModal, setShowShareModal] = useState(false);
+
   const handleRemove = () => {
     onRemove(file.id);
     toast.success(`Removed ${file.name}`);
   };
 
-const handlePreview = () => {
+  const handlePreview = () => {
     if (canPreview) {
       onPreview(file);
     }
+  };
+
+  const handleShare = () => {
+    setShowShareModal(true);
   };
 
   const getStatusColor = (status) => {
@@ -121,7 +128,7 @@ const handlePreview = () => {
           )}
         </div>
 
-        {/* Actions */}
+{/* Actions */}
         <div className="flex items-center space-x-1 flex-shrink-0">
           {canPreview && (
             <Button
@@ -130,6 +137,15 @@ const handlePreview = () => {
               icon="Eye"
               onClick={handlePreview}
               className="p-1"
+            />
+          )}
+          {file.status === 'completed' && (
+            <Button
+              variant="ghost"
+              size="small"
+              icon="Share2"
+              onClick={handleShare}
+              className="p-1 text-gray-400 hover:text-primary"
             />
           )}
           <Button
@@ -141,6 +157,13 @@ const handlePreview = () => {
           />
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        file={file}
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+      />
     </motion.div>
   );
 };

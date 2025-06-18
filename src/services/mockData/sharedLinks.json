@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 1,
+    "fileId": 1,
+    "fileName": "project-proposal.pdf",
+    "token": "abc123def456ghi789jkl012mno345pq",
+    "link": "http://localhost:5173/shared/abc123def456ghi789jkl012mno345pq",
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "expiresAt": "2024-01-22T10:30:00.000Z",
+    "isActive": true,
+    "accessCount": 5
+  },
+  {
+    "Id": 2,
+    "fileId": 3,
+    "fileName": "team-photo.jpg",
+    "token": "xyz789uvw456rst123opq890lmn567hij",
+    "link": "http://localhost:5173/shared/xyz789uvw456rst123opq890lmn567hij",
+    "createdAt": "2024-01-16T14:20:00.000Z",
+    "expiresAt": null,
+    "isActive": true,
+    "accessCount": 12
+  }
+]

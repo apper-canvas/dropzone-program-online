@@ -7,7 +7,6 @@ import FilePreviewModal from '@/components/molecules/FilePreviewModal';
 import UploadStats from '@/components/molecules/UploadStats';
 import Button from '@/components/atoms/Button';
 import { uploadService } from '@/services';
-
 const FileUploader = () => {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
